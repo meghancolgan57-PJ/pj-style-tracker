@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Phoebe Jon — Style Number Tracker</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fafaf8;
+    --surface: #f3f2ee;
+    --surface2: #eceae4;
+    --border: #e0ddd5;
+    --border2: #ccc9bf;
+    --text: #1a1917;
+    --text2: #6b6860;
+    --text3: #9e9b93;
+    --accent: #1a1917;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --mono: 'Courier New', Courier, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    background: #fff;
+  }
+
+  header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  header span {
+    font-size: 13px;
+    color: var(--text3);
+    letter-spacing: 0.04em;
+  }
+
+  .main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 36px 40px 80px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .row4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text2); font-weight: 500; }
+  .field .hint { font-size: 11px; color: var(--text3); }
+
+  select, input[type="text"] {
+    height: 38px;
+    padding: 0 11px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    font-family: var(--sans);
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: none;
+    transition: border-color 0.15s;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6860' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 11px center;
+    padding-right: 32px;
+  }
+
+  select:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: var(--text);
+  }
+
+  .preview-block {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .preview-num {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.03em;
+  }
+
+  .seg-row {
+    display: flex;
+    gap: 0;
+    margin-top: 5px;
+    font-size: 10px;
+    color: var(--text3);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .btn-row { display: flex; gap: 10px; }
+
+  button {
+    font-family: var(--sans);
+    cursor: pointer;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: opacity 0.15s, background 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--text);
+    color: #fff;
+    border: none;
+    height: 40px;
+    padding: 0 22px;
+    flex: 1;
+  }
+  .btn-primary:hover { opacity: 0.82; }
+
+  .btn-outline {
+    background: #fff;
+    color: var(--text2);
+    border: 1px solid var(--border);
+    height: 40px;
+    padding: 0 16px;
+  }
+  .btn-outline:hover { background: var(--surface); color: var(--text); border-color: var(--border2); }
+
+  .btn-sm {
+    height: 32px;
+    padding: 0 13px;
+    font-size: 12px;
+  }
+
+  /* Settings panel */
+  .settings-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .settings-panel.open { display: block; }
+  .settings-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .settings-section { }
+  .settings-section-title { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text2); font-weight: 500; margin-bottom: 10px; }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; min-height: 30px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #fff; border: 1px solid var(--border); border-radius: 100px;
+    padding: 3px 8px 3px 11px; font-size: 12px; font-family: var(--mono); color: var(--text);
+  }
+  .tag-x {
+    background: none; border: none; cursor: pointer; color: var(--text3);
+    font-size: 14px; line-height: 1; padding: 0; display: flex; align-items: center;
+  }
+  .tag-x:hover { color: #c0392b; }
+
+  .add-tag-row { display: flex; gap: 8px; }
+  .add-tag-row input { flex: 1; height: 34px; font-size: 13px; }
+  .cat-add-row { display: flex; gap: 8px; align-items: center; }
+  .cat-code-inp { width: 72px; font-family: var(--mono); }
+  .cat-label-inp { flex: 1; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* Stats */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .stat-val { font-size: 22px; font-weight: 600; color: var(--text); }
+  .stat-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* Log table */
+  .log-wrap { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .log-header {
+    display: grid;
+    grid-template-columns: 2.2fr 1.3fr 1fr 1fr 0.8fr 0.8fr 1.3fr 36px;
+    gap: 8px; padding: 8px 16px;
+    font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3);
+    border-bottom: 1px solid var(--border); background: var(--surface);
+    font-weight: 500;
+  }
+  .log-row {
+    display: grid;
+    grid-template-columns: 2.2fr 1.3fr 1fr 1fr 0.8fr 0.8fr 1.3fr 36px;
+    gap: 8px; padding: 11px 16px; font-size: 13px; align-items: center;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .log-row:last-child { border-bottom: none; }
+  .log-row:hover { background: var(--surface); }
+
+  .mono-cell { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+  .muted { color: var(--text2); font-size: 12px; }
+  .mono-muted { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+
+  .badge {
+    display: inline-block; padding: 2px 9px; border-radius: 100px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+
+  .del-btn {
+    background: none; border: none; cursor: pointer; color: var(--text3);
+    width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .del-btn:hover { color: #c0392b; background: #fdecea; }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 14px; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--text); color: #fff; padding: 9px 20px;
+    border-radius: var(--radius); font-size: 13px;
+    opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 999;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
+
+  /* SVG icons */
+  .icon { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  @media (max-width: 700px) {
+    .main { padding: 20px 16px 60px; }
+    header { padding: 14px 16px; }
+    .row4 { grid-template-columns: 1fr 1fr; }
+    .log-header, .log-row { grid-template-columns: 2fr 1fr 1fr 28px; }
+    .log-header > *:nth-child(n+3):not(:nth-child(4)):not(:last-child),
+    .log-row > *:nth-child(n+3):not(:nth-child(4)):not(:last-child) { display: none; }
+    .settings-cols { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Phoebe Jon</h1>
+  <span>Style Number Tracker</span>
+</header>
+
+<div class="main">
+
+  <!-- Generator card -->
+  <div class="card">
+    <div class="section-label">Generate style #</div>
+
+    <div class="row4">
+      <div class="field">
+        <label>Category</label>
+        <select id="cat"></select>
+      </div>
+      <div class="field">
+        <label>Season</label>
+        <select id="season"></select>
+      </div>
+      <div class="field">
+        <label>Factory code</label>
+        <input type="text" id="factory" placeholder="e.g. IT01" maxlength="6" style="text-transform:uppercase" />
+        <span class="hint">Factory's assigned code</span>
+      </div>
+      <div class="field">
+        <label>Fabric code</label>
+        <input type="text" id="fab" placeholder="e.g. LN" maxlength="4" style="text-transform:uppercase" />
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Style name <span style="color:#9e9b93;font-size:10px;text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <input type="text" id="name" placeholder="e.g. Riviera Blouse" />
+      </div>
+      <div class="field">
+        <label>Notes <span style="color:#9e9b93;font-size:10px;text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <input type="text" id="notes" placeholder="e.g. colorways, construction notes" />
+      </div>
+    </div>
+
+    <div class="preview-block">
+      <div style="flex:1;">
+        <div style="font-size:10px;letter-spacing:0.07em;text-transform:uppercase;color:#9e9b93;margin-bottom:5px;">Generated style #</div>
+        <div class="preview-num" id="preview">—</div>
+        <div class="seg-row" id="seg-labels"></div>
+      </div>
+      <button class="btn-outline" onclick="copyStyle()" id="copy-btn">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="addStyle()">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add to log
+      </button>
+      <button class="btn-outline" onclick="toggleSettings()" id="settings-btn">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Manage lists
+      </button>
+      <button class="btn-outline" onclick="exportCSV()">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Settings panel -->
+  <div class="settings-panel" id="settings-panel">
+    <div class="settings-cols">
+      <div class="settings-section">
+        <div class="settings-section-title">Seasons</div>
+        <div class="tag-list" id="season-tags"></div>
+        <div class="add-tag-row">
+          <input type="text" id="new-season" placeholder="e.g. FW27" maxlength="8" style="text-transform:uppercase;font-family:var(--mono);" />
+          <button class="btn-outline btn-sm" onclick="addSeason()">+ Add</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Categories</div>
+        <div class="tag-list" id="cat-tags"></div>
+        <div style="font-size:11px;color:#9e9b93;margin-bottom:7px;">Code (2–4 chars) + full name</div>
+        <div class="cat-add-row">
+          <input type="text" id="new-cat-code" placeholder="DR" maxlength="4" class="cat-code-inp" style="font-family:var(--mono);text-transform:uppercase;" />
+          <input type="text" id="new-cat-label" placeholder="Dress" class="cat-label-inp" />
+          <button class="btn-outline btn-sm" onclick="addCategory()">+ Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-val" id="total-count">0</div>
+      <div class="stat-lbl">Total styles</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="season-count">0</div>
+      <div class="stat-lbl" id="season-count-lbl">This season</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="cat-count">0</div>
+      <div class="stat-lbl" id="cat-count-lbl">Category</div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="log-wrap">
+    <div class="log-header">
+      <div>Style #</div>
+      <div>Name</div>
+      <div>Category</div>
+      <div>Season</div>
+      <div>Factory</div>
+      <div>Fabric</div>
+      <div>Notes</div>
+      <div></div>
+    </div>
+    <div id="log"></div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+const DEFAULT_SEASONS = ['SS27','FW27','SS28','FW28','RES27','PRE28'];
+const DEFAULT_CATS = { SH:'Shirt', KN:'Knit', PT:'Pants', JK:'Jacket', SW:'Sweater', AC:'Accessory' };
+const COLOR_POOL = [
+  ['#e8f5ee','#1a6641'],['#eeebfd','#4a3fb5'],['#fdf3e3','#7a4a0a'],
+  ['#fceee9','#8a3218'],['#e6f0fb','#154d94'],['#fbe8f1','#8a2a52'],
+  ['#eaf3de','#2f6010'],['#fceaea','#922'],['#f0eeea','#555248']
+];
+
+const LS = {
+  get: (k, def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+let styles = LS.get('pj_styles_v4', []);
+let seasons = LS.get('pj_seasons', DEFAULT_SEASONS);
+let cats = LS.get('pj_cats', DEFAULT_CATS);
+
+const save = () => LS.set('pj_styles_v4', styles);
+const saveSeasons = () => LS.set('pj_seasons', seasons);
+const saveCats = () => LS.set('pj_cats', cats);
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function catColor(code) {
+  const idx = Object.keys(cats).indexOf(code);
+  return COLOR_POOL[(idx < 0 ? 0 : idx) % COLOR_POOL.length];
+}
+
+// Dropdowns
+function populateSeasonSelect() {
+  const sel = document.getElementById('season'), cur = sel.value;
+  sel.innerHTML = seasons.map(s => `<option value="${s}"${s===cur?' selected':''}>${s}</option>`).join('');
+}
+function populateCatSelect() {
+  const sel = document.getElementById('cat'), cur = sel.value;
+  sel.innerHTML = Object.entries(cats).map(([c,l]) =>
+    `<option value="${c}"${c===cur?' selected':''}>${c} — ${l}</option>`).join('');
+}
+
+// Settings toggle
+function toggleSettings() {
+  const p = document.getElementById('settings-panel');
+  const open = p.classList.toggle('open');
+  document.getElementById('settings-btn').innerHTML = open
+    ? `<svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Done`
+    : `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Manage lists`;
+}
+
+// Season management
+function renderSeasonTags() {
+  document.getElementById('season-tags').innerHTML = seasons.map(s =>
+    `<span class="tag">${s}<button class="tag-x" onclick="removeSeason('${s}')" title="Remove">×</button></span>`).join('');
+}
+function addSeason() {
+  const inp = document.getElementById('new-season');
+  const val = inp.value.trim().toUpperCase();
+  if (!val) return;
+  if (seasons.includes(val)) { toast('Season already exists'); return; }
+  seasons.push(val); saveSeasons(); inp.value = '';
+  renderSeasonTags(); populateSeasonSelect(); updatePreview();
+  toast(`${val} added`);
+}
+function removeSeason(s) {
+  if (seasons.length <= 1) { toast("Can't remove the last season"); return; }
+  seasons = seasons.filter(x => x !== s); saveSeasons();
+  renderSeasonTags(); populateSeasonSelect(); updatePreview();
+}
+
+// Category management
+function renderCatTags() {
+  document.getElementById('cat-tags').innerHTML = Object.entries(cats).map(([c,l]) =>
+    `<span class="tag">${c} · ${l}<button class="tag-x" onclick="removeCat('${c}')" title="Remove">×</button></span>`).join('');
+}
+function addCategory() {
+  const code = document.getElementById('new-cat-code').value.trim().toUpperCase();
+  const label = document.getElementById('new-cat-label').value.trim();
+  if (!code || !label) { toast('Enter both a code and a name'); return; }
+  if (cats[code]) { toast('Code already exists'); return; }
+  cats[code] = label; saveCats();
+  document.getElementById('new-cat-code').value = '';
+  document.getElementById('new-cat-label').value = '';
+  renderCatTags(); populateCatSelect(); updatePreview();
+  toast(`${code} — ${label} added`);
+}
+function removeCat(code) {
+  if (Object.keys(cats).length <= 1) { toast("Can't remove the last category"); return; }
+  delete cats[code]; saveCats();
+  renderCatTags(); populateCatSelect(); updatePreview();
+}
+
+// Style number logic
+function nextSeq(cat, season) {
+  return String(styles.filter(s => s.cat === cat && s.season === season).length + 1).padStart(3, '0');
+}
+function buildNum(cat, season, factory, fab) {
+  const parts = [cat, season, nextSeq(cat, season)];
+  if (factory) parts.push(factory.toUpperCase());
+  if (fab) parts.push(fab.toUpperCase());
+  return parts.join('-');
+}
+
+function updatePreview() {
+  const cat = document.getElementById('cat').value;
+  const season = document.getElementById('season').value;
+  const factory = document.getElementById('factory').value;
+  const fab = document.getElementById('fab').value;
+  if (!cat || !season) return;
+  const seq = nextSeq(cat, season);
+  const parts = [{val:cat,lbl:'cat'},{val:season,lbl:'season'},{val:seq,lbl:'seq'}];
+  if (factory) parts.push({val:factory.toUpperCase(),lbl:'factory'});
+  if (fab) parts.push({val:fab.toUpperCase(),lbl:'fabric'});
+  document.getElementById('preview').textContent = parts.map(p=>p.val).join('-');
+  document.getElementById('seg-labels').innerHTML = parts.map((p,i) =>
+    `<span style="display:inline-block;text-align:center;min-width:${p.val.length*8}px;">${p.lbl}</span>${i<parts.length-1?'<span style="opacity:0.35;margin:0 1px;">–</span>':''}`
+  ).join('');
+  updateStats();
+}
+
+function updateStats() {
+  const cat = document.getElementById('cat').value;
+  const season = document.getElementById('season').value;
+  document.getElementById('total-count').textContent = styles.length;
+  document.getElementById('season-count').textContent = styles.filter(s=>s.season===season).length;
+  document.getElementById('season-count-lbl').textContent = season;
+  document.getElementById('cat-count').textContent = styles.filter(s=>s.cat===cat).length;
+  document.getElementById('cat-count-lbl').textContent = cats[cat]||cat;
+}
+
+function addStyle() {
+  const cat = document.getElementById('cat').value;
+  const season = document.getElementById('season').value;
+  const factory = document.getElementById('factory').value.toUpperCase();
+  const fab = document.getElementById('fab').value.toUpperCase();
+  const name = document.getElementById('name').value.trim();
+  const notes = document.getElementById('notes').value.trim();
+  const num = buildNum(cat, season, factory, fab);
+  const date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  styles.unshift({num,cat,season,factory,fab,name,notes,date,id:Date.now()});
+  save(); renderLog();
+  ['name','notes','fab','factory'].forEach(id => document.getElementById(id).value = '');
+  updatePreview(); toast('Style added');
+}
+
+function deleteStyle(id) {
+  if (!confirm('Remove this style from the log?')) return;
+  styles = styles.filter(s=>s.id!==id); save(); renderLog(); updatePreview();
+}
+
+function copyStyle() {
+  const txt = document.getElementById('preview').textContent;
+  if (txt === '—') return;
+  navigator.clipboard.writeText(txt).catch(()=>{});
+  const btn = document.getElementById('copy-btn');
+  btn.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Copied`;
+  setTimeout(()=>{ btn.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy`; }, 1500);
+}
+
+function exportCSV() {
+  if (!styles.length) { toast('No styles to export yet'); return; }
+  const headers = ['Style #','Style Name','Category','Season','Factory Code','Fabric Code','Notes','Date Added'];
+  const rows = styles.map(s=>[
+    s.num, s.name||'', cats[s.cat]||s.cat, s.season, s.factory||'', s.fab||'', s.notes||'', s.date||''
+  ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','),...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = `phoebe-jon-styles-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  toast('CSV downloaded');
+}
+
+function renderLog() {
+  const log = document.getElementById('log');
+  if (!styles.length) {
+    log.innerHTML = '<div class="empty-state">No styles logged yet — generate your first one above.</div>';
+    return;
+  }
+  log.innerHTML = styles.map(s => {
+    const [bg,fg] = catColor(s.cat);
+    return `<div class="log-row">
+      <div class="mono-cell">${s.num}</div>
+      <div class="muted">${s.name||'—'}</div>
+      <div><span class="badge" style="background:${bg};color:${fg};">${cats[s.cat]||s.cat}</span></div>
+      <div class="muted">${s.season}</div>
+      <div class="mono-muted">${s.factory||'—'}</div>
+      <div class="mono-muted">${s.fab||'—'}</div>
+      <div class="muted" style="font-size:11px;">${s.notes||'—'}</div>
+      <button class="del-btn" onclick="deleteStyle(${s.id})" title="Remove">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+// Init
+['cat','season','factory','fab'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updatePreview);
+});
+document.getElementById('new-season').addEventListener('keydown', e => { if(e.key==='Enter') addSeason(); });
+document.getElementById('new-cat-label').addEventListener('keydown', e => { if(e.key==='Enter') addCategory(); });
+
+populateSeasonSelect();
+populateCatSelect();
+renderSeasonTags();
+renderCatTags();
+renderLog();
+updatePreview();
+</script>
+</body>
+</html>
